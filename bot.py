@@ -11,8 +11,8 @@ from bs4 import BeautifulSoup
 
 #load_dotenv()  # Φορτώνει μεταβλητές από το .env αρχείο
 
-TOKEN = os.getenv("DISCORD_TOKEN")
-CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
+TOKEN = DISCORD_TOKEN
+CHANNEL_ID = CHANNEL_ID
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='/', intents=intents)

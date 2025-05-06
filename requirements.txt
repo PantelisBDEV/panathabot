@@ -1,0 +1,5 @@
+pillow~=11.2.1
+discord.py
+beautifulsoup4~=4.13.4
+discord~=2.3.2
+requests~=2.32.3

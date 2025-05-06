@@ -37,6 +37,7 @@ def get_latest_panathinaikosbc_article():
 def get_latest_panathinaikos_article():
     url = "https://www.sport24.gr/football/tag/panathinaikos/"
     response = requests.get(url)
+    print(response.status_code)
     soup = BeautifulSoup(response.text, 'html.parser')
 
     h2 = soup.find("h2", class_="article_card__title")

@@ -6,10 +6,10 @@ import asyncio
 from PIL import Image, ImageDraw, ImageFont
 from discord.ext import commands, tasks
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 
-load_dotenv()  # Φορτώνει μεταβλητές από το .env αρχείο
+#load_dotenv()  # Φορτώνει μεταβλητές από το .env αρχείο
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))

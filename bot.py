@@ -6,18 +6,19 @@ import asyncio
 from PIL import Image, ImageDraw, ImageFont
 from discord.ext import commands, tasks
 from bs4 import BeautifulSoup
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
+from datetime import datetime
 
-
-#load_dotenv()  # Φορτώνει μεταβλητές από το .env αρχείο
+load_dotenv()  # Φορτώνει μεταβλητές από το .env αρχείο
 
 TOKEN = os.getenv("DISCORD_TOKEN")
-CHANNEL_ID = os.getenv("CHANNEL_ID")
+CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='/', intents=intents)
 last_article_url = None  # Αποθηκεύει το τελευταίο URL
 last_article_urlbc = None  # Αποθηκεύει το τελευταίο URL
+
 
 
 def get_latest_panathinaikosbc_article():
@@ -37,7 +38,7 @@ def get_latest_panathinaikosbc_article():
 def get_latest_panathinaikos_article():
     url = "https://www.sport24.gr/football/tag/panathinaikos/"
     response = requests.get(url)
-    print(response.status_code)
+    #print(response.status_code)
     soup = BeautifulSoup(response.text, 'html.parser')
 
     h2 = soup.find("h2", class_="article_card__title")
@@ -96,7 +97,7 @@ async def check_for_new_bc_article():
 
 @bot.command()
 async def nextmatch(ctx):
-    await ctx.send("🔍 Έλεγχος για τον επόμενο αγώνα...")
+    await ctx.send("🔍 Έλεγχος για τους επόμενους αγώνες του Παναθηναϊκού FC...")
     try:
         url = "https://www.pao.gr/the-matches/fixtures/"
         headers = {
@@ -118,15 +119,65 @@ async def nextmatch(ctx):
         else:
             home_team = "Άγνωστη"
             away_team = "Άγνωστη"
-        await ctx.send(
-            f"🏟️ **Επόμενος Αγώνας Παναθηναϊκού**\n"
-            f"**{home_team} vs {away_team}**\n"
-            f"📅 Ημερομηνία & Ώρα: `{date_time}`\n"
-            f"📘 Διοργάνωση: `{league}`\n"
-            f"🔗 [Περισσότερα](https://www.pao.gr/the-matches/fixtures/)"
+
+        embed = discord.Embed(
+            title=f"{home_team} vs {away_team}",
+            description=f"🏆 ({league})",
+            color=discord.Color.green()
         )
+
+        embed.add_field(name="📅 Ημερομηνία & Ώρα", value=date_time, inline=False)
+        embed.add_field(name="🔗 Περισσότερα", value=f"[Δες στο pao.gr](https://www.pao.gr/the-matches/fixtures/)", inline=False)
+        embed.set_footer(text="www.pao.gr",
+                         icon_url="https://www.pao.gr/wp-content/uploads/2020/01/17/logo_pao_new-2.png")
+
+        await ctx.send(embed=embed)
+
     except Exception as e:
         await ctx.send(f"⚠️ Σφάλμα: {str(e)}")
+
+
+@bot.command()
+async def nextmatchbc(ctx):
+    await ctx.send("🔍 Έλεγχος για τους επόμενους αγώνες του Παναθηναϊκού BC...")
+
+    try:
+        url = "https://www.sofascore.com/api/v1/team/3508/events/next/0"
+        headers = {
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        response = requests.get(url, headers=headers)
+        data = response.json()
+
+        events = data.get("events", [])
+
+        if not events:
+            await ctx.send("❌ Δεν βρέθηκαν επόμενοι αγώνες.")
+            return
+
+        for event in events:
+            home_team = event["homeTeam"]["name"]
+            away_team = event["awayTeam"]["name"]
+            start_timestamp = event["startTimestamp"]
+            match_date = datetime.fromtimestamp(start_timestamp).strftime('%A, %d %B %Y - %H:%M')
+            tournament = event["tournament"]["name"]
+            league = event["tournament"]["category"]["name"]
+            match_url = f"https://www.sofascore.com/{event.get('slug', '')}"
+
+            embed = discord.Embed(
+                title=f"{home_team} vs {away_team}",
+                description=f"🏆 {tournament} ({league})",
+                color=discord.Color.green()
+            )
+            embed.add_field(name="📅 Ημερομηνία & Ώρα", value=match_date, inline=False)
+            embed.add_field(name="🔗 Περισσότερα", value=f"[Δες στο SofaScore]({match_url})", inline=False)
+            embed.set_footer(text="Panathinaikos BC • Sofascore Feed", icon_url="https://images.statsengine.playbyplay.api.geniussports.com/c5e845983c7864c4ad4ab93adc87ded7L1.png")
+
+            await ctx.send(embed=embed)
+
+    except Exception as e:
+        await ctx.send(f"⚠️ Σφάλμα κατά την ανάκτηση του αγώνα: `{str(e)}`")
 
 
 @bot.command()

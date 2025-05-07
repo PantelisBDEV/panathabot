@@ -8,6 +8,7 @@ from discord.ext import commands, tasks
 from bs4 import BeautifulSoup
 #from dotenv import load_dotenv
 from datetime import datetime
+import random
 
 #load_dotenv()  # Φορτώνει μεταβλητές από το .env αρχείο
 
@@ -19,11 +20,26 @@ bot = commands.Bot(command_prefix='/', intents=intents)
 last_article_url = None  # Αποθηκεύει το τελευταίο URL
 last_article_urlbc = None  # Αποθηκεύει το τελευταίο URL
 
+headers_list = [
+    {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+    },
+    {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
+        "Accept-Language": "en-US,en;q=0.9",
+    },
+    {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+]
 
 
 def get_latest_panathinaikosbc_article():
     url2 = "https://www.sport24.gr/basket/tag/panathinaikos/"
-    response2 = requests.get(url2)
+    headers = random.choice(headers_list)
+    response2 = requests.get(url2, headers=headers, timeout=10)
     soup2 = BeautifulSoup(response2.text, 'html.parser')
 
     h2 = soup2.find("h2", class_="article_card__title")
@@ -37,7 +53,8 @@ def get_latest_panathinaikosbc_article():
 
 def get_latest_panathinaikos_article():
     url = "https://www.sport24.gr/football/tag/panathinaikos/"
-    response = requests.get(url)
+    headers = random.choice(headers_list)
+    response = requests.get(url, headers=headers, timeout=10)
     #print(response.status_code)
     soup = BeautifulSoup(response.text, 'html.parser')
 
